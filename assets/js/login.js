@@ -59,19 +59,24 @@ $(function() {
         //监听登录表单
     $("#form_login").on('submit', function(e) {
         e.preventDefault()
+
         $.ajax({
             url: '/api/login',
             method: 'POST',
             data: $(this).serialize(),
             success: (res) => {
+                //console.log(1);失败
                 if (res.status !== 0) {
+                    console.log(2);
                     return layer.msg('登陆失败！')
                 }
+                //console.log(2);失败
                 layer.msg('登陆成功！')
                 localStorage.setItem('token', res.token)
                 location.href = '/index.html'
             }
         })
+
         location.href = '/index.html'
     })
 })
