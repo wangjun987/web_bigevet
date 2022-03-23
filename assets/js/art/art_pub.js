@@ -1,23 +1,42 @@
 $(function() {
     let form = layui.form
     let layer = layui.layer
-        // 1.1 获取裁剪区域的 DOM 元素
-    let $image = $('#image')
-        // 1.2 配置选项
-    const options = {
-        // 纵横比4/3  16/9
-        aspectRatio: 1,
-        // 指定预览区域
+    initCade()
+    initEditor()
+
+    function initCade() {
+        $.ajax({
+            method: 'GET',
+            url: '/my/article/cates',
+            success: function(res) {
+                if (res.status !== 0) {
+                    return layer.msg('初始化文章分类失败！')
+                }
+                let htmlStr = template('tpl-cate', res)
+                $('[name=cate_id]').html(htmlStr)
+                    //调用分页
+                form.render()
+            },
+        })
+    }
+
+
+    // 1. 初始化图片裁剪器
+    var $image = $('#image')
+
+    // 2. 裁剪选项
+    var options = {
+        aspectRatio: 400 / 280,
         preview: '.img-preview'
     }
 
-    // 1.3 创建裁剪区域
+    // 3. 初始化裁剪区域
     $image.cropper(options)
 
     $("#btnChooseImage").on('click', function() {
-        $("#file").click()
+        $('#coverFile').click()
     })
-    $("#file").on('change', function(e) {
+    $("#coverFile").on('change', function(e) {
         let filelist = e.target.files
         if (filelist.length === 0) {
             return layer.msg('请选择照片')
@@ -29,32 +48,6 @@ $(function() {
             .attr('src', newImgURL) // 重新设置图片路径
             .cropper(options) // 重新初始化裁剪区域
     })
-
-    $("#btnUpload").on('click', function() {
-        let dataURL = $image
-            .cropper('getCroppedCanvas', { // 创建一个 Canvas 画布
-                width: 100,
-                height: 100
-            })
-            .toDataURL('image/png') // 将 Canvas 画布上的内容，转化为 base64 格式的字符串
-        $.ajax({
-            method: 'POST',
-            url: '/my/updata/avatar',
-            data: {
-                avatar: dataURL
-            },
-            success: function(res) {
-                if (res.status !== 0) {
-                    return layer.msg('更换头像失败！')
-                }
-                //赋值
-                layer.msg('更换头像成功！')
-
-                window.parent.getUserInfo()
-            },
-        })
-    })
-
     let art_state = '已发布'
     $('#btnSave2').on('click', function() {
         art_state = '草稿'
